@@ -95,7 +95,7 @@ type Query {
   """ Shipping simulation """
   shipping(
     """ List of SKU products """
-    items: [SimulationItem],
+    items: [ShippingItem],
     """ Postal code to freight calculator """
     postalCode: String,
     """ Country of postal code """
