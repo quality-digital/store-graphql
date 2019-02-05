@@ -88,7 +88,7 @@ export class CheckoutDataSource extends RESTDataSource<Context> {
     '/pub/orders'
   )
 
-  public shipping = (simulation: SimulationData) => this.post(
+  public simulation = (simulation: SimulationData) => this.post(
     '/pub/orderForms/simulation',
     simulation,
   )

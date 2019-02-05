@@ -83,14 +83,24 @@ type Query {
   brands: [Brand] @cacheControl(scope: PUBLIC, maxAge: MEDIUM)
 
   """ OrderForm simulation """
-  shipping(
+  simulation(
     """ List of SKU products """
-    items: [ShippingItem],
+    items: [SimulationItem],
     """ Postal code to freight calculator """
     postalCode: String,
     """ Country of postal code """
     country: String
-  ): ShippingData
+  ): SimulationData
+
+  """ Shipping simulation """
+  shipping(
+    """ List of SKU products """
+    items: [SimulationItem],
+    """ Postal code to freight calculator """
+    postalCode: String,
+    """ Country of postal code """
+    country: String
+  ): ShippingData @deprecated(reason: "Use the simulation query instead")
 
   """ Get checkout cart details """
   orderForm: OrderForm @cacheControl(scope: PRIVATE)
@@ -139,7 +149,7 @@ type Query {
   """ Get the benefits associated with a list of products """
   benefits(
     """ List of Products """
-    items: [ShippingItem]
+    items: [SimulationItem]
   ): [Benefit]
 
   """ Get the options available to authenticate users """
