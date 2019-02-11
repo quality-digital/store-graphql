@@ -1,5 +1,5 @@
 import { ApolloError } from 'apollo-server-errors'
-import { compose, equals, find, head, last, map, path, prop, split, test } from 'ramda'
+import { compose, equals, find, flatten, head, last, map, path, prop, reduce, split, test } from 'ramda'
 import ResolverError from '../../errors/resolverError'
 
 import { toIOMessage } from '../../utils/ioMessage'
@@ -124,9 +124,33 @@ export const queries = {
 
   brands: async (_, __, { dataSources: { catalog } }: Context) => catalog.brands(),
 
-  category: async (_, { id }, { dataSources: { catalog } }: Context) => catalog.category(id),
+  brandSearch: async (_, { query }, { dataSources: { catalog }}) => catalog.brandSearch(query) as Promise<Brand[]>,
+
+  category: async (_, { id }, { dataSources: { catalog } }) => catalog.category(id),
 
   categories: async (_, { treeLevel }, { dataSources: { catalog } }: Context) => catalog.categories(treeLevel),
+
+  categorySearch: async (_, { query }, { dataSources: { catalog } }) => {
+    const departments = await catalog.categories(0) as Category[]
+    const parentIds = departments.map(department => department.id)
+    const children = await Promise.all(parentIds.map((parentId) => {
+      return catalog.categorySearch(query, parentId) as Category[]
+    }))
+
+    const categories = flatten(children)
+
+    return categories
+  },
+
+  collectionSearch: async (_, { query }, { dataSources: { catalog } }) => {
+    const data = await catalog.collectionSearch(query)
+
+    const collections = data.items
+
+    return collections
+  },
+
+  departmentSearch: async (_, { query }, { dataSources: { catalog } }) => catalog.categorySearch(query) as Category[],
 
   search: async (_, args, ctx: Context) => {
     const { map: mapParams, query } = args
