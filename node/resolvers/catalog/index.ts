@@ -1,5 +1,18 @@
 import { ApolloError } from 'apollo-server-errors'
-import { compose, equals, find, flatten, head, last, map, path, prop, reduce, split, test } from 'ramda'
+import {
+  compose,
+  equals,
+  find,
+  flatten,
+  head,
+  last,
+  map,
+  path,
+  prop,
+  reduce,
+  split,
+  test
+} from 'ramda'
 import ResolverError from '../../errors/resolverError'
 
 import { toIOMessage } from '../../utils/ioMessage'
@@ -33,7 +46,10 @@ const extractSlug = item => {
   return item.criteria ? `${href[3]}/${href[4]}` : href[3]
 }
 
-const lastSegment = compose<string, string[], string>(last, split('/'))
+const lastSegment = compose<string, string[], string>(
+  last,
+  split('/')
+)
 
 function findInTree(tree, values, index = 0) {
   for (const node of tree) {
@@ -58,7 +74,7 @@ export const fieldResolvers = {
   ...productResolvers,
   ...recommendationResolvers,
   ...searchResolvers,
-  ...skuResolvers,
+  ...skuResolvers
 }
 
 export const queries = {
@@ -78,7 +94,7 @@ export const queries = {
           slug: extractSlug(item),
         }),
         itemsReturned
-      ),
+      )
     }
   },
 
@@ -124,18 +140,22 @@ export const queries = {
 
   brands: async (_, __, { dataSources: { catalog } }: Context) => catalog.brands(),
 
-  brandSearch: async (_, { query }, { dataSources: { catalog }}) => catalog.brandSearch(query) as Promise<Brand[]>,
+  brandSearch: async (_, { query }, { dataSources: { catalog } }) =>
+    catalog.brandSearch(query) as Promise<Brand[]>,
 
-  category: async (_, { id }, { dataSources: { catalog } }) => catalog.category(id),
+  category: async (_, { id }, { dataSources: { catalog } }) =>
+    catalog.category(id),
 
   categories: async (_, { treeLevel }, { dataSources: { catalog } }: Context) => catalog.categories(treeLevel),
 
   categorySearch: async (_, { query }, { dataSources: { catalog } }) => {
-    const departments = await catalog.categories(0) as Category[]
+    const departments = (await catalog.categories(0)) as Category[]
     const parentIds = departments.map(department => department.id)
-    const children = await Promise.all(parentIds.map((parentId) => {
-      return catalog.categorySearch(query, parentId) as Category[]
-    }))
+    const children = await Promise.all(
+      parentIds.map(parentId => {
+        return catalog.categorySearch(query, parentId) as Category[]
+      })
+    )
 
     const categories = flatten(children)
 
@@ -150,23 +170,31 @@ export const queries = {
     return collections
   },
 
-  departmentSearch: async (_, { query }, { dataSources: { catalog } }) => catalog.categorySearch(query) as Category[],
+  departmentSearch: async (_, { query }, { dataSources: { catalog } }) =>
+    catalog.categorySearch(query) as Category[],
 
   search: async (_, args, ctx: Context) => {
     const { map: mapParams, query } = args
 
     if (query == null || mapParams == null) {
-      throw new ApolloError('Search query/map cannot be null', 'ERR_EMPTY_QUERY')
+      throw new ApolloError(
+        'Search query/map cannot be null',
+        'ERR_EMPTY_QUERY'
+      )
     }
 
     const categoryMetaData = async () => {
       const category = findInTree(
-        await queries.categories(_, { treeLevel: query.split('/').length }, ctx),
+        await queries.categories(
+          _,
+          { treeLevel: query.split('/').length },
+          ctx
+        ),
         query.split('/')
       )
       return {
         metaTagDescription: path(['MetaTagDescription'], category),
-        titleTag: path(['Title'], category),
+        titleTag: path(['Title'], category)
       }
     }
 
@@ -183,8 +211,10 @@ export const queries = {
 
     const searchMetaData = async () => {
       const lastMap = mapParams.split(',').pop(-1)
-      const meta = lastMap === 'c' ? await categoryMetaData()
-        : lastMap === 'b' && await brandMetaData()
+      const meta =
+        lastMap === 'c'
+          ? await categoryMetaData()
+          : lastMap === 'b' && (await brandMetaData())
       return meta
     }
 
@@ -193,26 +223,29 @@ export const queries = {
     return {
       metaTagDescription,
       queryArgs: args,
-      titleTag,
+      titleTag
     }
   },
 
+<<<<<<< HEAD
   searchContextFromParams: async (
     _,
     args,
     { dataSources: { catalog } }: Context
   ) => {
+=======
+  searchContextFromParams: async (_, args, { dataSources: { catalog } }) => {
+>>>>>>> Prettify
     const response = {
       brand: null,
       category: null,
-      contextKey: 'search',
+      contextKey: 'search'
     }
 
     if (args.brand) {
       const brands = await catalog.brands()
       const found = brands.find(
-        brand =>
-          brand.isActive && Slugify(brand.name) === args.brand
+        brand => brand.isActive && Slugify(brand.name) === args.brand
       )
       response.brand = found && found.id
     }
@@ -240,7 +273,7 @@ export const queries = {
     }
 
     return response
-  },
+  }
 }
 
 interface Category {
