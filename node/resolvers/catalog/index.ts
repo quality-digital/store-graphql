@@ -240,7 +240,7 @@ const getSearchMetaData = async (
 
 const translateToStoreDefaultLanguage = async (
   clients: Context['clients'],
-  term: string
+  term: any
 ): Promise<string> => {
   const { segment, messagesGraphQL } = clients
   const [{ cultureInfo: to }, { cultureInfo: from }] = await Promise.all([
@@ -552,7 +552,10 @@ export const queries = {
       contextKey: 'search',
     }
 
-    const [brandId, categoryId] = await Promise.all<string | null, string | number | null>([
+    const [brandId, categoryId] = await Promise.all<
+      string | null,
+      string | number | null
+    >([
       getBrandId(args.brand, catalog, isVtex, logger),
       searchContextGetCategory(args, catalog, isVtex, logger),
     ])

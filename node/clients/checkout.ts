@@ -162,15 +162,16 @@ export class Checkout extends JanusClient {
 
   public orderForm = () => {
     return this.post<OrderForm>(
-      this.routes.orderForm,
+      this.routes.orderForm(),
       { expectedOrderFormSections: ['items'] },
       { metric: 'checkout-orderForm' }
     )
   }
 
-  public orderFormRaw = () => {
+  public orderFormRaw = (orderFormId?: string) => {
+    console.log('Checkout -> publicorderFormRaw -> orderFormId', orderFormId)
     return this.postRaw<OrderForm>(
-      this.routes.orderForm,
+      this.routes.orderForm(orderFormId),
       { expectedOrderFormSections: ['items'] },
       { metric: 'checkout-orderForm' }
     )
@@ -178,7 +179,7 @@ export class Checkout extends JanusClient {
 
   public newOrderForm = () => {
     return this.http
-      .postRaw<OrderForm>(this.routes.orderForm, undefined, {
+      .postRaw<OrderForm>(this.routes.orderForm(), undefined, {
         metric: 'checkout-newOrderForm',
       })
       .catch(statusToError) as Promise<IOResponse<OrderForm>>
@@ -300,7 +301,7 @@ export class Checkout extends JanusClient {
         `${base}/orderForm/${orderFormId}/items/${itemId}/assemblyOptions/${assemblyOptionsId}`,
       checkin: (orderFormId: string) =>
         `${base}/orderForm/${orderFormId}/checkIn`,
-      orderForm: `${base}/orderForm`,
+      orderForm: (orderFormId?: string) => `${base}/orderForm/${orderFormId ?? ''}`,
       orders: `${base}/orders`,
       simulation: (queryString: string) =>
         `${base}/orderForms/simulation${queryString}`,

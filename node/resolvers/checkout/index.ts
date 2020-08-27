@@ -220,13 +220,15 @@ export async function setCheckoutCookies(rawHeaders: Record<string, any>, ctx: C
 }
 
 export const queries: Record<string, Resolver> = {
-  orderForm: async (_, __, ctx) => {
+  orderForm: async (_, { orderFormId }, ctx) => {
     const {
       clients: { checkout },
       vtex: { segment },
     } = ctx
 
-    const { headers, data } = await checkout.orderFormRaw()
+    console.log("orderFormId", orderFormId)
+
+    const { headers, data } = await checkout.orderFormRaw(orderFormId)
 
     const orderForm = await syncWithStoreLocale(
       data,
